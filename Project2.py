@@ -24,7 +24,7 @@ set_background('./background.jpg')
 st.logo("./hasaki.png")
 
 # Add content to the sidebar
-st.sidebar.title(f"DEMO VERSION v0.2")
+st.sidebar.title(f"DEMO VERSION")
 st.sidebar.write("Xây dựng hệ thống đề xuất sản phẩm cho website HASAKI.vn.")
 st.sidebar.markdown(
     """
@@ -56,7 +56,16 @@ st.sidebar.markdown(
     """
 )
 if choice == "Giới thiệu":
-    pass
+    st.image("./banner.jpg")
+    st.title(":green[HASAKI.vn]")
+    st.markdown("""
+                :grey[**Hasaki.vn** là hệ thống cửa hàng mỹ phẩm chính hãng và dịch vụ chăm sóc sắc đẹp chuyên sâu.
+                **Hasaki.vn** đang mong muốn xây dựng một hệ thống đề xuất sản phẩm, hỗ trợ người dùng nhanh chóng chọn được sản phẩm phù hợp.]
+                <br>
+                """)
+    st.markdown("""
+                :grey[Đây là bản demo hai chức năng :blue[***Recommender System***] được xây dựng cho website **Hasaki.vn**. ]
+                """)
 elif choice == "Đề xuất theo sản phẩm":
     # Load the saved data
     with open('./content_based.pkl', 'rb') as f:
@@ -83,19 +92,24 @@ elif choice == "Đề xuất theo sản phẩm":
         return recs
 
     # Example usage
+    
+    st.image("./content-based.jpg")
     sample = pd.read_csv("./sample_product.csv")
     product_dict = sample.set_index('ten_san_pham')['ma_san_pham'].to_dict()
+    st.title(":blue[Đề xuất sản phẩm tương đồng với sản phẩm đang xem.]")
+    st.write()
+
     current_product = st.selectbox(
-        ":red[Vui lòng chọn sản phẩm:]",
+        ":red[Chọn sản phẩm đang xem:]",
         list(product_dict.keys())
     )
     example_id = product_dict[current_product]
 
-    st.write(f":grey[Sản phẩm đang chọn:] :blue[{current_product}]")
-    st.write(f":grey[Mã sản phẩm:] :blue[{example_id}]")
+    st.markdown(f":grey[Sản phẩm đang chọn:] ***:green[{current_product}]***")
+    st.write(f":grey[Mã sản phẩm:]", example_id)
 
     st.write(f":grey[Thông tin chi tiết:]")
-    st.write(f":blue[{(sample[sample['ma_san_pham']==example_id]['mo_ta'].values[0]).strip()}]")
+    st.write(f":grey[{(sample[sample['ma_san_pham']==example_id]['mo_ta'].values[0]).strip()}]")
     
     recommendations = get_recommendations(example_id)   
     recommendations['ma_san_pham'] = recommendations['ma_san_pham'].astype(str)
@@ -110,6 +124,9 @@ else:
     model = saved_data['model']
     df = saved_data['df']
     
+    st.image("./collaborative_filtering.png")
+    st.subheader(""":blue[Đề xuất sản phẩm dựa theo tương đồng về đánh giá của khách hàng.]
+                """)
 
     with st.popover("Đăng nhập"):
         name = st.text_input("Tên đăng nhập")
@@ -122,17 +139,18 @@ else:
 
     try:
         user_id = product_dict[name]
-        st.write(f":grey[Đang hiển thị: {name}]")
+        st.write(f":grey[Đang hiển thị: :blue[{name}]]")
         st.write(":grey[Mã khách hàng:]",user_id)
-        st.write(':grey[Các bình luận đã đăng:')
+        st.write(':grey[Các bình luận đã đăng:]')
         st.write(df[df['ho_ten']==name].head(5))
-
 
         df_score = df[["ma_san_pham","ten_san_pham", "diem_trung_binh"]]
         df_score['EstimateScore'] = df_score['ma_san_pham'].apply(lambda x: model.predict(user_id, x).est) # est: get EstimateScore
         df_score = df_score.sort_values(by=['EstimateScore'], ascending=False)
         df_score['ma_san_pham'] = df_score['ma_san_pham'].astype(str)
         df_score = df_score.drop_duplicates()
-        st.write(df_score.sort_values(by=['diem_trung_binh'], ascending=False).head(5))
+
+        st.markdown(f":grey[Các sản phẩm mà :blue[**{name}**] có thể sẽ thích:]")
+        st.write(df_score.sort_values(by=['diem_trung_binh'], ascending=False).head(3))
     except:
         st.write(":red[Vui lòng nhập tên đăng nhập!]")
