@@ -4,6 +4,7 @@ import pickle
 import base64
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import random
 
 st.set_page_config(layout="wide")
 
@@ -133,8 +134,9 @@ elif choice == "Đề xuất theo sản phẩm":
     st.markdown("<h5 style='color:#2e8f58;'>Chọn sản phẩm:</h5>", unsafe_allow_html=True)
 
     current_product = st.selectbox("",
-        list(product_dict.keys())
-    )
+        list(product_dict.keys()),
+    placeholder="Chọn sản phẩm")
+
     st.write("")
     example_id = product_dict[current_product]
 
@@ -143,7 +145,8 @@ elif choice == "Đề xuất theo sản phẩm":
     st.write("")
     col1, col2 = st.columns([0.3,0.7])
     with col1:
-        st.image('./prod1.png')
+        random_pic = random.randint(1,8)
+        st.image(f'./prod{random_pic}.png')
     with col2: 
         st.markdown(f"""
         <p style='color:#000000; font-size: 18px;'>
@@ -172,12 +175,62 @@ elif choice == "Đề xuất theo sản phẩm":
                     <b>{recommendations.iloc[0,:]['ten_san_pham']}</b>
                     </p>
                     """,  unsafe_allow_html=True)
+        st.markdown(f"""
+        <p style='color:#1f1d1d; font-size: 18px;text-align: center;'>
+        <b> Mã sản phẩm: {recommendations.iloc[0,:]['ma_san_pham']}</b>
+        </p>
+        """,  unsafe_allow_html=True)
         with st.expander(":grey[\t\tThông tin chi tiết]", icon="👉"):
+            random_pic = random.randint(1,8)
+            st.image(f'./prod{random_pic}.png')
             st.markdown(f"""
-                    <p style='color:#2e8f58; font-size: 15px;text-align: center;'>
+                    <p style='color:#1f1d1d; font-size: 15px;text-align: left;'>
                     <i>{recommendations.iloc[0,:]['mo_ta']}</i>
                     </p>
                     """,  unsafe_allow_html=True)
+            st.markdown(f":grey[Điểm đánh giá: {recommendations.iloc[0,:]['diem_trung_binh']}]:star:")
+
+    with item2:
+        st.markdown(f"""
+            <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+            <b>{recommendations.iloc[1,:]['ten_san_pham']}</b>
+            </p>
+            """,  unsafe_allow_html=True)
+        st.markdown(f"""
+            <p style='color:#1f1d1d; font-size: 18px;text-align: center;'>
+            <b>Mã sản phẩm: {recommendations.iloc[1,:]['ma_san_pham']}</b>
+            </p>
+            """,  unsafe_allow_html=True)
+        with st.expander(":grey[\t\tThông tin chi tiết]", icon="👉"):
+            random_pic = random.randint(1,8)
+            st.image(f'./prod{random_pic}.png')
+            st.markdown(f"""
+                    <p style='color:#1f1d1d; font-size: 15px;text-align: left;'>
+                    <i>{recommendations.iloc[1,:]['mo_ta']}</i>
+                    </p>
+                    """,  unsafe_allow_html=True)
+            st.markdown(f":grey[Điểm đánh giá: {recommendations.iloc[1,:]['diem_trung_binh']}]:star:")
+    with item3:
+        st.markdown(f"""
+            <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+            <b>{recommendations.iloc[2,:]['ten_san_pham']}</b>
+            </p>
+            """,  unsafe_allow_html=True)
+        st.markdown(f"""
+                    <p style='color:#1f1d1d; font-size: 18px;text-align: center;'>
+                    <b> Mã sản phẩm: {recommendations.iloc[2,:]['ma_san_pham']}</b>
+                    </p>
+                    """,  unsafe_allow_html=True)
+        with st.expander(":grey[\t\tThông tin chi tiết]", icon="👉"):
+            random_pic = random.randint(1,8)
+            st.image(f'./prod{random_pic}.png')
+           
+            st.markdown(f"""
+                    <p style='color:#1f1d1d; font-size: 15px;text-align: left;'>
+                    <i>{recommendations.iloc[2,:]['mo_ta']}</i>
+                    </p>
+                    """,  unsafe_allow_html=True)
+            st.markdown(f":grey[Điểm đánh giá: {recommendations.iloc[1,:]['diem_trung_binh']}]:star:")
 else:
     # Load the saved data
 
@@ -189,32 +242,76 @@ else:
     df = saved_data['df']
     
     st.image("./collaborative_filtering.png")
-    st.subheader(""":blue[Đề xuất sản phẩm dựa theo tương đồng về đánh giá của khách hàng.]
-                """)
+    st.markdown("<h2 style='text-align: center; color:#2e8f58; font-family:verdana;'>ĐỀ XUẤT SẢN PHẨM PHÙ HỢP VỚI KHÁCH HÀNG</h2>", unsafe_allow_html=True)
 
-    with st.popover("Đăng nhập"):
-        name = st.text_input("Tên đăng nhập")
-        
     customer = pd.read_csv("./Cung_cap_HV/data/Khach_hang.csv")
-    product_dict = customer.set_index('ho_ten')['ma_khach_hang'].to_dict()
-
+    customer_dict = customer.set_index('ho_ten')['ma_khach_hang'].to_dict()
+    
     product = pd.read_csv("./Cung_cap_HV/data/San_pham.csv")
+
+
+    name = st.selectbox("",
+        list(customer_dict.keys())
+    )
+     
+    st.write("")
     df = pd.merge(df,product,how='left',on="ma_san_pham")
 
     try:
-        user_id = product_dict[name]
-        st.write(f":grey[Đang hiển thị: :blue[{name}]]")
-        st.write(":grey[Mã khách hàng:]",user_id)
-        st.write(':grey[Các bình luận đã đăng:]')
-        st.write(df[df['ho_ten']==name].head(5))
+        cmt1,cmt_mid,cmt2  = st.columns([0.3,0.01,0.59])
+        user_id = customer_dict[name]
+        with cmt1:
+            st.markdown(f"<h6 style='color:#404040;'>Đang hiển thị: <span style='color: green;'><i>{name}</i></span> </h6>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color:#1f1d1d;'>Mã khách hàng: {user_id}:key:</span>", unsafe_allow_html=True)
+            cmt_list = df[df['ma_khach_hang']==user_id]['noi_dung_binh_luan'].tolist()
+            st.markdown(f"<span style='color:#1f1d1d;'><b>Số bình luận đã đăng: {len(cmt_list)}</b></span>", unsafe_allow_html=True)
+            try:
+                cmt_id = random.sample(range(0, len(cmt_list)), 3)
+            except:
+                cmt_id = list(range(0,len(cmt_list)))
+            for i in cmt_id:
+                st.markdown(f"<span style='color:#1f1d1d;'><b>Sản phẩm: {df[df['ma_khach_hang']==user_id]['ten_san_pham'].tolist()[i]}</b> </br> <i>{cmt_list[i]}</i> </br> {df[df['ma_khach_hang']==user_id]['so_sao'].tolist()[i]}:star:</span>", unsafe_allow_html=True)
 
-        df_score = df[["ma_san_pham","ten_san_pham", "diem_trung_binh"]]
-        df_score['EstimateScore'] = df_score['ma_san_pham'].apply(lambda x: model.predict(user_id, x).est) # est: get EstimateScore
-        df_score = df_score.sort_values(by=['EstimateScore'], ascending=False)
-        df_score['ma_san_pham'] = df_score['ma_san_pham'].astype(str)
-        df_score = df_score.drop_duplicates()
+        with cmt2:
+            df_score = df[["ma_san_pham","ten_san_pham", "diem_trung_binh"]]
+            df_score['EstimateScore'] = df_score['ma_san_pham'].apply(lambda x: model.predict(user_id, x).est) # est: get EstimateScore
+            df_score = df_score.sort_values(by=['EstimateScore'], ascending=False)
+            df_score['ma_san_pham'] = df_score['ma_san_pham'].astype(str)
+            df_score = df_score.drop_duplicates()
+            st.markdown(f":grey[Các sản phẩm mà :blue[**{name}**] có thể sẽ thích:]")
+            #st.write(df_score.sort_values(by=['diem_trung_binh'], ascending=False).head(3))
+            item1, item2, item3 = st.columns(3)
+            with item1:
+                st.markdown(f"""
+                            <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+                            <b>{df_score.iloc[0,:]['ten_san_pham']}</b>
+                            </p>
+                            """,  unsafe_allow_html=True)
+                random_pic = random.randint(1,8)
+                st.image(f'./prod{random_pic}.png')
+                st.markdown(f":grey[Điểm đánh giá: {df_score.iloc[0,:]['diem_trung_binh']}]:star:")
 
-        st.markdown(f":grey[Các sản phẩm mà :blue[**{name}**] có thể sẽ thích:]")
-        st.write(df_score.sort_values(by=['diem_trung_binh'], ascending=False).head(3))
+            with item2:
+                st.markdown(f"""
+                    <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+                    <b>{df_score.iloc[1,:]['ten_san_pham']}</b>
+                    </p>
+                    """,  unsafe_allow_html=True)
+                random_pic = random.randint(1,8)
+                st.image(f'./prod{random_pic}.png')
+
+                st.markdown(f":grey[Điểm đánh giá: {df_score.iloc[1,:]['diem_trung_binh']}]:star:")
+            with item3:
+                st.markdown(f"""
+                    <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+                    <b>{df_score.iloc[2,:]['ten_san_pham']}</b>
+                    </p>
+                    """,  unsafe_allow_html=True)
+            
+                random_pic = random.randint(1,8)
+                st.image(f'./prod{random_pic}.png')
+                
+                st.markdown(f":grey[Điểm đánh giá: {df_score.iloc[1,:]['diem_trung_binh']}]:star:")
+
     except:
-        st.write(":red[Vui lòng nhập tên đăng nhập!]")
+        st.write(":red[Vui lòng chọn tên đăng nhập!]")
