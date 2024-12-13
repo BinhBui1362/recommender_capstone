@@ -3,7 +3,6 @@ import pandas as pd
 import pickle
 import base64
 from wordcloud import WordCloud
-from streamlit_extras.stylable_container import stylable_container
 import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")
