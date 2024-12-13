@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import pickle
 import base64
+from wordcloud import WordCloud
+from streamlit_extras.stylable_container import stylable_container
+import matplotlib.pyplot as plt
+
+st.set_page_config(layout="wide")
 
 def get_base64(bin_file):
     with open(bin_file, 'rb') as f:
@@ -21,7 +26,7 @@ def set_background(png_file):
     st.markdown(page_bg_img, unsafe_allow_html=True)
 set_background('./background.jpg')
 
-st.logo("./hasaki.png")
+st.logo("./hasaki.png", size='large')
 
 # Add content to the sidebar
 st.sidebar.title(f"DEMO VERSION")
@@ -32,7 +37,6 @@ st.sidebar.markdown(
     - **Theo đánh giá của người dùng.**
     """
 )
-
 
 # Main content
 menu = ["Giới thiệu", "Đề xuất theo sản phẩm", "Đề xuất theo khách hàng"]
@@ -55,17 +59,43 @@ st.sidebar.markdown(
      :blue[**Lê Thị Thanh Trúc**]\t:woman:
     """
 )
+st.sidebar.text("")
+st.sidebar.text("")
+st.sidebar.text("")
+st.sidebar.text("")
+
+
 if choice == "Giới thiệu":
-    st.image("./banner.jpg")
-    st.title(":green[HASAKI.vn]")
+
+    st.markdown("<h1 style='text-align: center; color:#404040; font-family:verdana;'>CAPSTONE PROJECT</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color:#2e8f58; font-family:verdana;'>Product Recommender System</h2><br>", unsafe_allow_html=True)
+    st.image("./banner.jpg",use_container_width=True)
+    st.write("")
+    st.markdown("<h3 style='color:#2e8f58;'>Khách hàng</h3>", unsafe_allow_html=True)
     st.markdown("""
-                :grey[**Hasaki.vn** là hệ thống cửa hàng mỹ phẩm chính hãng và dịch vụ chăm sóc sắc đẹp chuyên sâu.
-                **Hasaki.vn** đang mong muốn xây dựng một hệ thống đề xuất sản phẩm, hỗ trợ người dùng nhanh chóng chọn được sản phẩm phù hợp.]
-                <br>
-                """)
+                <p style='color:#000000; font-size: 22px;'><b>Hasaki.vn</b> là hệ thống cửa hàng mỹ phẩm chính hãng và dịch vụ chăm sóc sắc đẹp chuyên sâu.
+                <b>Hasaki.vn</b> đang mong muốn xây dựng một hệ thống đề xuất sản phẩm, hỗ trợ người dùng nhanh chóng chọn được sản phẩm phù hợp.
+                </p>
+                """,  unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#2e8f58;'>Dữ liệu</h3>", unsafe_allow_html=True)
     st.markdown("""
-                :grey[Đây là bản demo hai chức năng :blue[***Recommender System***] được xây dựng cho website **Hasaki.vn**. ]
-                """)
+            <p style='color:#000000; font-size: 22px;'>Dữ liệu được thu thập từ website <b>Hasaki.vn</b>, với danh mục là các sản phẩm <i>Chăm sóc da mặt</i> và được phân chia thành 3 bảng:<br>
+            </p>
+            """,  unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("<h4 style='text-align: center; color:#404040;'>SẢN PHẨM</h4>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<h4 style='text-align: center; color:#404040;'>ĐÁNH GIÁ</h4>", unsafe_allow_html=True)
+    with col3:
+        st.markdown("<h4 style='text-align: center; color:#404040;'>KHÁCH HÀNG</h4>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#2e8f58;'>Giải pháp</h3>", unsafe_allow_html=True)
+    st.markdown("""
+            <p style='color:#000000; font-size: 22px;'>
+                Các mô hình sử dụng để giải quyết bài toán lần lượt là <i><b>Cosine Similarity</b></i> cho việc đề xuất sản phẩm tương tự, và <i><b>SVDpp</b></i> 
+                trong thư viện Surprise cho việc đề xuất sản phẩm dựa trên đánh giá của khách hàng.
+            </p>
+            """,  unsafe_allow_html=True)
 elif choice == "Đề xuất theo sản phẩm":
     # Load the saved data
     with open('./content_based.pkl', 'rb') as f:
@@ -93,30 +123,65 @@ elif choice == "Đề xuất theo sản phẩm":
 
     # Example usage
     
-    st.image("./content-based.jpg")
+    st.image("./content-based.png",use_container_width=True)
     sample = pd.read_csv("./sample_product.csv")
     product_dict = sample.set_index('ten_san_pham')['ma_san_pham'].to_dict()
-    st.title(":blue[Đề xuất sản phẩm tương đồng với sản phẩm đang xem.]")
-    st.write()
+    st.markdown("<h2 style='text-align: center; color:#2e8f58; font-family:verdana;'>ĐỀ XUẤT SẢN PHẨM TƯƠNG ĐỒNG</h2>", unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+    st.write("")
 
-    current_product = st.selectbox(
-        ":red[Chọn sản phẩm đang xem:]",
+    st.markdown("<h5 style='color:#2e8f58;'>Chọn sản phẩm:</h5>", unsafe_allow_html=True)
+
+    current_product = st.selectbox("",
         list(product_dict.keys())
     )
+    st.write("")
     example_id = product_dict[current_product]
 
-    st.markdown(f":grey[Sản phẩm đang chọn:] ***:green[{current_product}]***")
-    st.write(f":grey[Mã sản phẩm:]", example_id)
+    st.markdown(f"<h4 style='color:#404040;'>Sản phẩm đang chọn: <span style='color: green;'><i>{current_product}</i></span> </h4>", unsafe_allow_html=True)
+    st.write("")
+    st.write("")
+    col1, col2 = st.columns([0.3,0.7])
+    with col1:
+        st.image('./prod1.png')
+    with col2: 
+        st.markdown(f"""
+        <p style='color:#000000; font-size: 18px;'>
+            Mã sản phẩm: <span style='color: green;'><b>{example_id}</b></span>
+        </p>
+        """,  unsafe_allow_html=True)
 
-    st.write(f":grey[Thông tin chi tiết:]")
-    st.write(f":grey[{(sample[sample['ma_san_pham']==example_id]['mo_ta'].values[0]).strip()}]")
+        st.markdown(f":grey[{(sample[sample['ma_san_pham']==example_id]['diem_trung_binh'].values[0])}]:star:")
+
+        st.markdown(f"""
+        <p style='color:#000000; font-size: 15px;'>
+            {(sample[sample['ma_san_pham']==example_id]['mo_ta'].values[0]).strip()}
+        </p>
+        """,  unsafe_allow_html=True)
+
     
     recommendations = get_recommendations(example_id)   
     recommendations['ma_san_pham'] = recommendations['ma_san_pham'].astype(str)
-    st.write(":grey[Các sản phẩm tương tự:]")
-    st.write(recommendations)
+    st.write("")
+    st.write("")
+    st.write(":red[Các sản phẩm tương tự:]")
+    item1, item2, item3 = st.columns(3)
+    with item1:
+        st.markdown(f"""
+                    <p style='color:#2e8f58; font-size: 18px;text-align: center;'>
+                    <b>{recommendations.iloc[0,:]['ten_san_pham']}</b>
+                    </p>
+                    """,  unsafe_allow_html=True)
+        with st.expander(":grey[\t\tThông tin chi tiết]", icon="👉"):
+            st.markdown(f"""
+                    <p style='color:#2e8f58; font-size: 15px;text-align: center;'>
+                    <i>{recommendations.iloc[0,:]['mo_ta']}</i>
+                    </p>
+                    """,  unsafe_allow_html=True)
 else:
     # Load the saved data
+
     with open('./collaborative.pkl', 'rb') as f:
         saved_data = pickle.load(f)
 
